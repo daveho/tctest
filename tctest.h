@@ -1,5 +1,5 @@
 // TCTest - a tiny unit test framework for C
-// Copyright (c) 2013, David H. Hovemeyer <david.hovemeyer@gmail.com>
+// Copyright (c) 2013,2019 David H. Hovemeyer <david.hovemeyer@gmail.com>
 // 
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -59,6 +59,15 @@ void tctest_segfault_handler(int signum, siginfo_t *info, void *addr);
 		printf("failed assertion %s at line %d\n", #cond, __LINE__); \
 		siglongjmp(tctest_env, 1); \
 	} \
+} while (0)
+
+/*
+ * Use this macro to unconditionally fail the current test with
+ * specified error message.
+ */
+#define FATAL(msg) do { \
+	printf("%s\n", msg); \
+	siglongjmp(tctest_env, 1); \
 } while (0)
 
 #define TEST_FINI() do { \
