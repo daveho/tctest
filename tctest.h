@@ -23,7 +23,9 @@
 #ifndef TCTEST_H
 #define TCTEST_H
 
+#include <stdio.h>
 #include <setjmp.h>
+#include <signal.h>
 
 extern sigjmp_buf tctest_env;
 extern int tctest_assertion_line;
