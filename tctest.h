@@ -61,11 +61,10 @@ void tctest_segfault_handler(int signum, siginfo_t *info, void *addr);
 	} \
 } while (0)
 
-/*
- * Use this macro to unconditionally fail the current test with
- * specified error message.
- */
-#define FATAL(msg) do { \
+// Use this macro to unconditionally fail the current test with
+// specified error message.  This is somewhat nicer than doing
+// ASSERT(0).
+#define FAIL(msg) do { \
 	printf("%s\n", msg); \
 	siglongjmp(tctest_env, 1); \
 } while (0)
