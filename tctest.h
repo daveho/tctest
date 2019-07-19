@@ -24,13 +24,40 @@
 #define TCTEST_H
 
 #include <stdio.h>
+#include <string.h>
 #include <setjmp.h>
 #include <signal.h>
 
 extern sigjmp_buf tctest_env;
 extern int tctest_assertion_line;
 extern int tctest_failures;
+extern int tctest_num_executed;
 void tctest_segfault_handler(int signum, siginfo_t *info, void *addr);
+
+/*
+ * Setting this pointer to a non-null value will cause tctest to
+ * only execute the test with the specified name (which must
+ * exactly match the name of a test function.)  This is useful
+ * for allowing the test driver to run a single test.
+ */
+extern const char *tctest_testname_to_execute;
+
+/*
+ * If this function pointer is set to a non-null value, it will
+ * be called after a test has been executed.  The testname parameter
+ * is the name of the test function.  The passed parameter will
+ * be true (nonzero) if the test passed, and false (zero) if the
+ * test did not pass.
+ */
+extern void (*tctest_on_test_executed)(const char *testname, int passed);
+
+/*
+ * If this function pointer is set to a non-null value, it will
+ * be called after all tests have executed.  The parameters
+ * are the number of tests passed and the total number of tests
+ * executed (respectively.)
+ */
+extern void (*tctest_on_complete)(int num_passed, int num_executed);
 
 #define TEST_INIT() do { \
 	struct sigaction sa; \
@@ -41,16 +68,25 @@ void tctest_segfault_handler(int signum, siginfo_t *info, void *addr);
 } while (0)
 
 #define TEST(func) do { \
-	TestObjs *t = setup(); \
-	if (sigsetjmp(tctest_env, 1) == 0) { \
-		printf("%s...", #func); \
-		fflush(stdout); \
-		func(t); \
-		printf("passed!\n"); \
-	} else { \
-		tctest_failures++; \
+	if (!tctest_testname_to_execute || strcmp(tctest_testname_to_execute, #func) == 0) { \
+		tctest_num_executed++; \
+		TestObjs *t = setup(); \
+		if (sigsetjmp(tctest_env, 1) == 0) { \
+			printf("%s...", #func); \
+			fflush(stdout); \
+			func(t); \
+			printf("passed!\n"); \
+			if (tctest_on_test_executed) { \
+				tctest_on_test_executed(#func, 1); \
+			} \
+		} else { \
+			tctest_failures++; \
+			if (tctest_on_test_executed) { \
+				tctest_on_test_executed(#func, 0); \
+			} \
+		} \
+		cleanup(t); \
 	} \
-	cleanup(t); \
 } while (0)
 
 #define ASSERT(cond) do { \
@@ -74,6 +110,9 @@ void tctest_segfault_handler(int signum, siginfo_t *info, void *addr);
 		printf("All tests passed!\n"); \
 	} else { \
 		printf("%d test(s) failed\n", tctest_failures); \
+	} \
+	if (tctest_on_complete) { \
+		tctest_on_complete(tctest_num_executed - tctest_failures, tctest_num_executed); \
 	} \
 	return tctest_failures > 0; \
 } while (0)

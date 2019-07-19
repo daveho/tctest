@@ -26,7 +26,55 @@ void testPush(TestObjs *objs);
 void testPushMany(TestObjs *objs);
 void testSwapTopElts(TestObjs *objs);
 
-int main(void) {
+/*
+ * Example test execution hook function.
+ */
+void onTestExecuted(const char *testname, int passed) {
+	/* to avoid cluttered output, only print if DEMO_VERBOSE is set */
+	if (getenv("DEMO_VERBOSE")) {
+		printf("Test %s %s\n", testname, passed ? "passed" : "failed");
+	}
+}
+
+/*
+ * Example completion hook function: called by TEST_FINI.
+ * Useful for reporting overall results of testing.
+ */
+void onComplete(int numPassed, int numExecuted) {
+	/* to avoid cluttered output, only print if DEMO_VERBOSE is set */
+	if (getenv("DEMO_VERBOSE")) {
+		printf("Tests complete, %d/%d passed\n", numPassed, numExecuted);
+	}
+}
+
+int main(int argc, char **argv) {
+	if (argc > 2) {
+		printf("Usage: %s [<test name>]\n", argv[0]);
+		return 1;
+	}
+
+	/*
+	 * If a command line argument is passed, it's the name
+	 * of the test to be executed.
+	 */
+	if (argc == 2) {
+		tctest_testname_to_execute = argv[1];
+	}
+
+	/*
+	 * Install test execution hook.
+	 */
+	tctest_on_test_executed = onTestExecuted;
+
+	/*
+	 * Install completion hook.
+	 * (Only test suites that need to do something special
+	 * to report results really need to do this: TEST_FINI
+	 * generates a reasonable human-readable summary of
+	 * the executed tests.
+	 */
+	tctest_on_complete = onComplete;
+
 	/* Prepare to run tests */
 	TEST_INIT();
 

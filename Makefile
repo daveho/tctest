@@ -1,3 +1,4 @@
+C_SRCS = demo.c demofn.c tctest.c
 CC = gcc
 CFLAGS = -g -Wall
 
@@ -22,3 +23,11 @@ tctest.o : tctest.c tctest.h
 
 clean :
 	rm -f *.o $(DEMOPROGS)
+
+depend :
+	$(CC) -M $(C_SRCS) > depend.mak
+
+depend.mak :
+	touch $@
+
+include depend.mak
