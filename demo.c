@@ -63,6 +63,8 @@ int main(int argc, char **argv) {
 
 	/*
 	 * Install test execution hook.
+	 * (Only test suites that need to do detailed monitoring or
+	 * reporting of test execution will need to do this.)
 	 */
 	tctest_on_test_executed = onTestExecuted;
 
