@@ -60,7 +60,7 @@ static void tctest_signal_handler(int signum, siginfo_t *info, void *addr) {
 		}
 	}
 	
-	printf("%s (most recent assertion at line %d)\n", msg, tctest_assertion_line);
+	printf("%s (most recent ASSERT at line %d)\n", msg, tctest_assertion_line);
 	siglongjmp(tctest_env, 1);
 }
 

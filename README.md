@@ -26,9 +26,9 @@ The demo program [demo.c](demo.c) shows how to write a test program using TCTest
 
 ```
 testPush...passed!
-testPushMany...failed assertion !stackPush(objs->s, 11) at line 130
-testSwapTopElts...segmentation fault (most recent assertion at line 140)
-testSizeIsEven...floating point exception (most recent assertion at line 152)
+testPushMany...failed ASSERT !stackPush(objs->s, 11) at line 130
+testSwapTopElts...segmentation fault (most recent ASSERT at line 140)
+testSizeIsEven...floating point exception (most recent ASSERT at line 152)
 3 test(s) failed
 ```
 

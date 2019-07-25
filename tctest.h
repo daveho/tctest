@@ -91,7 +91,7 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 #define ASSERT(cond) do { \
 	tctest_assertion_line = __LINE__; \
 	if (!(cond)) { \
-		printf("failed assertion %s at line %d\n", #cond, __LINE__); \
+		printf("failed ASSERT %s at line %d\n", #cond, __LINE__); \
 		siglongjmp(tctest_env, 1); \
 	} \
 } while (0)
