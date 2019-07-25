@@ -68,11 +68,13 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 #define TEST(func) do { \
 	if (!tctest_testname_to_execute || strcmp(tctest_testname_to_execute, #func) == 0) { \
 		tctest_num_executed++; \
-		TestObjs *t = setup(); \
+		tctest_assertion_line = -1; \
 		if (sigsetjmp(tctest_env, 1) == 0) { \
+			TestObjs *t = setup(); \
 			printf("%s...", #func); \
 			fflush(stdout); \
 			func(t); \
+			cleanup(t); \
 			printf("passed!\n"); \
 			if (tctest_on_test_executed) { \
 				tctest_on_test_executed(#func, 1); \
@@ -83,7 +85,6 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 				tctest_on_test_executed(#func, 0); \
 			} \
 		} \
-		cleanup(t); \
 	} \
 } while (0)
 
