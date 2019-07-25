@@ -25,6 +25,7 @@ void cleanup(TestObjs *objs);
 void testPush(TestObjs *objs);
 void testPushMany(TestObjs *objs);
 void testSwapTopElts(TestObjs *objs);
+void testSizeIsEven(TestObjs *objs);
 
 /*
  * Example test execution hook function.
@@ -84,6 +85,7 @@ int main(int argc, char **argv) {
 	TEST(testPush);
 	TEST(testPushMany);
 	TEST(testSwapTopElts);
+	TEST(testSizeIsEven);
 
 	/*
 	 * Report results: exits with nonzero exit code if
@@ -141,4 +143,15 @@ void testSwapTopElts(TestObjs *objs) {
 	ASSERT(2 == x);
 	ASSERT(stackPop(objs->s, &x));
 	ASSERT(3 == x);
+}
+
+void testSizeIsEven(TestObjs *objs) {
+	ASSERT(stackPush(objs->s, 1));
+	ASSERT(stackPush(objs->s, 2));
+	ASSERT(stackPush(objs->s, 3));
+	ASSERT(!stackSizeIsEven(objs->s));
+
+	int x;
+	ASSERT(stackPop(objs->s, &x));
+	ASSERT(stackSizeIsEven(objs->s));
 }

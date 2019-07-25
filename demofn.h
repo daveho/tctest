@@ -16,6 +16,7 @@ bool stackPush(Stack *s, int val);
 bool stackPop(Stack *s, int *pVal);
 bool stackIsEmpty(Stack *s);
 bool stackSwapTopElts(Stack *s);
+bool stackSizeIsEven(Stack *s);
 void stackDestroy(Stack *s);
 
 #endif /* DEMOFN_H */

@@ -1,24 +1,26 @@
-// TCTest - a tiny unit test framework for C
-// Copyright (c) 2013,2019 David H. Hovemeyer <david.hovemeyer@gmail.com>
-// 
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-// 
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+/*
+ * TCTest - a tiny unit test framework for C
+ * Copyright (c) 2013,2019 David H. Hovemeyer <david.hovemeyer@gmail.com>
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 #ifndef TCTEST_H
 #define TCTEST_H
@@ -32,7 +34,7 @@ extern sigjmp_buf tctest_env;
 extern int tctest_assertion_line;
 extern int tctest_failures;
 extern int tctest_num_executed;
-void tctest_segfault_handler(int signum, siginfo_t *info, void *addr);
+void tctest_register_signal_handlers(void);
 
 /*
  * Setting this pointer to a non-null value will cause tctest to
@@ -60,11 +62,7 @@ extern void (*tctest_on_test_executed)(const char *testname, int passed);
 extern void (*tctest_on_complete)(int num_passed, int num_executed);
 
 #define TEST_INIT() do { \
-	struct sigaction sa; \
-	sa.sa_sigaction = &tctest_segfault_handler; \
-	sigemptyset(&sa.sa_mask); \
-	sa.sa_flags = 0; \
-	sigaction(SIGSEGV, &sa, NULL); \
+	tctest_register_signal_handlers(); \
 } while (0)
 
 #define TEST(func) do { \
@@ -97,9 +95,11 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 	} \
 } while (0)
 
-// Use this macro to unconditionally fail the current test with
-// specified error message.  This is somewhat nicer than doing
-// ASSERT(0).
+/*
+ * Use this macro to unconditionally fail the current test with
+ * specified error message.  This is somewhat nicer than doing
+ * ASSERT(0).
+ */
 #define FAIL(msg) do { \
 	printf("%s\n", msg); \
 	siglongjmp(tctest_env, 1); \
@@ -117,4 +117,4 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 	return tctest_failures > 0; \
 } while (0)
 
-#endif // TCTEST_H
+#endif /* TCTEST_H */

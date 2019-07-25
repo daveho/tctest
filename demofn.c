@@ -38,6 +38,12 @@ bool stackSwapTopElts(Stack *s) {
 	return true;
 }
 
+bool stackSizeIsEven(Stack *s) {
+	/* NOTE: has bug causing floating-point exception (divide by 0) */
+	int x = 0;
+	return s->count % x == 2;
+}
+
 void stackDestroy(Stack *s) {
 	free(s);
 }
