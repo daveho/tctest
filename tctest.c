@@ -82,6 +82,10 @@ static void tctest_print_signal_msg(const char *msg) {
 }
 
 static void tctest_signal_handler(int signum, siginfo_t *info, void *addr) {
+	/* shut up warnings about unused parameter(s) */
+	(void)info;
+	(void)addr;
+
 	/* look up message describing signal */
 	int i;
 	const char *msg = NULL;
