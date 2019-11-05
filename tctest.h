@@ -30,6 +30,10 @@
 #include <setjmp.h>
 #include <signal.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern sigjmp_buf tctest_env;
 extern int tctest_assertion_line;
 extern int tctest_failures;
@@ -117,5 +121,9 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 	} \
 	return tctest_failures > 0; \
 } while (0)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TCTEST_H */
