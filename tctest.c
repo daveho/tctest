@@ -22,8 +22,8 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <stdio.h>
 #include <signal.h>
+#include <unistd.h>
 #include "tctest.h"
 
 typedef struct {
@@ -49,6 +49,38 @@ const char *tctest_testname_to_execute;
 void (*tctest_on_test_executed)(const char *testname, int passed);
 void (*tctest_on_complete)(int num_passed, int num_executed);
 
+/*
+ * Workaround for the stdio functions not being
+ * async signal safe.
+ */
+static void tctest_print_signal_msg(const char *msg) {
+	char buf[512];
+	strcpy(buf, msg);
+	strcat(buf, " (most recent ASSERT at line ");
+
+	/* convert ASSERT line number to text */
+	char stack[16];
+	size_t ndig = 0;
+	int val = tctest_assertion_line;
+	do {
+		stack[ndig++] = '0' + (val % 10);
+		val /= 10;
+	} while (val > 0);
+
+	/* append text digits of ASSERT line number */
+	size_t n = strlen(buf);
+	while (ndig > 0) {
+		buf[n++] = stack[--ndig];
+	}
+
+	/* append ')' and newline */
+	buf[n++] = ')';
+	buf[n++] = '\n';
+
+	/* write to standard output */
+	write(1, buf, n);
+}
+
 static void tctest_signal_handler(int signum, siginfo_t *info, void *addr) {
 	/* look up message describing signal */
 	int i;
@@ -59,8 +91,11 @@ static void tctest_signal_handler(int signum, siginfo_t *info, void *addr) {
 			break;
 		}
 	}
-	
-	printf("%s (most recent ASSERT at line %d)\n", msg, tctest_assertion_line);
+
+	/* print message about failure */
+	tctest_print_signal_msg(msg);
+
+	/* jump back to TEST context */
 	siglongjmp(tctest_env, 1);
 }
 
