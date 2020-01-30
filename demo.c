@@ -26,6 +26,7 @@ void testPush(TestObjs *objs);
 void testPushMany(TestObjs *objs);
 void testSwapTopElts(TestObjs *objs);
 void testSizeIsEven(TestObjs *objs);
+void testSegfaultBeforeAssert(TestObjs *objs);
 
 /*
  * Example test execution hook function.
@@ -86,6 +87,7 @@ int main(int argc, char **argv) {
 	TEST(testPushMany);
 	TEST(testSwapTopElts);
 	TEST(testSizeIsEven);
+	TEST(testSegfaultBeforeAssert);
 
 	/*
 	 * Report results: exits with nonzero exit code if
@@ -154,4 +156,17 @@ void testSizeIsEven(TestObjs *objs) {
 	int x;
 	ASSERT(stackPop(objs->s, &x));
 	ASSERT(stackSizeIsEven(objs->s));
+}
+
+void testSegfaultBeforeAssert(TestObjs *objs) {
+	/* This test causes a segfault before any ASSERT is executed */
+	int x;
+	stackPush(objs->s, 1);
+	stackPush(objs->s, 2);
+	stackPush(objs->s, 3);
+	stackSwapTopElts(objs->s);
+	ASSERT(stackPop(objs->s, &x));
+	ASSERT(2 == x);
+	ASSERT(stackPop(objs->s, &x));
+	ASSERT(3 == x);
 }

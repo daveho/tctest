@@ -54,9 +54,19 @@ void (*tctest_on_complete)(int num_passed, int num_executed);
  * async signal safe.
  */
 static void tctest_print_signal_msg(const char *msg) {
+	size_t n = strlen(msg);
+
+	if (tctest_assertion_line <= 0) {
+		/* signal was received before there was an assertion */
+		write(1, msg, n);
+		write(1, "\n", 1);
+		return;
+	}
+
 	char buf[512];
 	strcpy(buf, msg);
-	strcat(buf, " (most recent ASSERT at line ");
+	memcpy(buf + n, " (most recent ASSERT at line ", 29);
+	n += 29;
 
 	/* convert ASSERT line number to text */
 	char stack[16];
@@ -68,7 +78,6 @@ static void tctest_print_signal_msg(const char *msg) {
 	} while (val > 0);
 
 	/* append text digits of ASSERT line number */
-	size_t n = strlen(buf);
 	while (ndig > 0) {
 		buf[n++] = stack[--ndig];
 	}
