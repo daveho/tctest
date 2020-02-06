@@ -58,8 +58,8 @@ static void tctest_print_signal_msg(const char *msg) {
 
 	if (tctest_assertion_line <= 0) {
 		/* signal was received before there was an assertion */
-		write(1, msg, n);
-		write(1, "\n", 1);
+		(void)write(1, msg, n);
+		(void)write(1, "\n", 1);
 		return;
 	}
 
@@ -87,7 +87,7 @@ static void tctest_print_signal_msg(const char *msg) {
 	buf[n++] = '\n';
 
 	/* write to standard output */
-	write(1, buf, n);
+	(void)write(1, buf, n);
 }
 
 static void tctest_signal_handler(int signum, siginfo_t *info, void *addr) {
