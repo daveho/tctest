@@ -50,6 +50,20 @@ void (*tctest_on_test_executed)(const char *testname, int passed);
 void (*tctest_on_complete)(int num_passed, int num_executed);
 
 /*
+ * Special version of write to work around the fact that
+ * gcc makes it rather difficult to suppress the warning
+ * that occurs when the return value of write is ignored.
+ * Casting to void doesn't work, so we use a do-nothing
+ * if statement.
+ */
+static void tctest_write(int fd, const void *buf, size_t n) {
+	if (write(fd, buf, n) != (ssize_t) n) {
+		/* there's really nothing useful we can do
+		 * if write doesn't work */
+	}
+}
+
+/*
  * Workaround for the stdio functions not being
  * async signal safe.
  */
@@ -58,8 +72,8 @@ static void tctest_print_signal_msg(const char *msg) {
 
 	if (tctest_assertion_line <= 0) {
 		/* signal was received before there was an assertion */
-		(void)write(1, msg, n);
-		(void)write(1, "\n", 1);
+		tctest_write(1, msg, n);
+		tctest_write(1, "\n", 1);
 		return;
 	}
 
@@ -87,7 +101,7 @@ static void tctest_print_signal_msg(const char *msg) {
 	buf[n++] = '\n';
 
 	/* write to standard output */
-	(void)write(1, buf, n);
+	tctest_write(1, buf, n);
 }
 
 static void tctest_signal_handler(int signum, siginfo_t *info, void *addr) {

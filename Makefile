@@ -1,6 +1,6 @@
 C_SRCS = demo.c demofn.c tctest.c
 CC = gcc
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -Wextra -pedantic -std=gnu11
 
 COMMON_OBJS = demofn.o tctest.o
 DEMOPROGS = demo
