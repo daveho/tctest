@@ -1,6 +1,6 @@
 /*
  * TCTest - a tiny unit test framework for C
- * Copyright (c) 2013,2019-2020 David H. Hovemeyer <david.hovemeyer@gmail.com>
+ * Copyright (c) 2013,2019-2021 David H. Hovemeyer <david.hovemeyer@gmail.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -71,14 +71,14 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 
 #define TEST(func) do { \
 	if (!tctest_testname_to_execute || strcmp(tctest_testname_to_execute, #func) == 0) { \
+		TestObjs *t = 0; \
 		tctest_num_executed++; \
 		tctest_assertion_line = -1; \
 		if (sigsetjmp(tctest_env, 1) == 0) { \
-			TestObjs *t = setup(); \
+			t = setup(); \
 			printf("%s...", #func); \
 			fflush(stdout); \
 			func(t); \
-			cleanup(t); \
 			printf("passed!\n"); \
 			if (tctest_on_test_executed) { \
 				tctest_on_test_executed(#func, 1); \
@@ -88,6 +88,9 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 			if (tctest_on_test_executed) { \
 				tctest_on_test_executed(#func, 0); \
 			} \
+		} \
+		if (t) { \
+			cleanup(t); \
 		} \
 	} \
 } while (0)
