@@ -1,6 +1,6 @@
 /*
- * TCTest - a tiny unit test framework for C
- * Copyright (c) 2013,2019-2021 David H. Hovemeyer <david.hovemeyer@gmail.com>
+ * TCTest - a tiny unit test framework for C and C++
+ * Copyright (c) 2013,2019-2021,2023 David H. Hovemeyer <david.hovemeyer@gmail.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -25,8 +25,14 @@
 #ifndef TCTEST_H
 #define TCTEST_H
 
+#ifdef __cplusplus
+#include <stdexcept>
+#include <cstdio>
+#include <cstring>
+#else
 #include <stdio.h>
 #include <string.h>
+#endif
 #include <setjmp.h>
 #include <signal.h>
 
@@ -65,6 +71,39 @@ extern void (*tctest_on_test_executed)(const char *testname, int passed);
  */
 extern void (*tctest_on_complete)(int num_passed, int num_executed);
 
+#ifdef __cplusplus
+/*
+ * For tests implemented in C++, attempt to
+ * catch exceptions thrown from test functions
+ * and count them as test failures
+ */
+
+#  define TCTEST_TRY \
+	try {
+
+#  define TCTEST_CATCH(func) \
+	} catch (std::exception &ex) { \
+		printf("std::exception (what='%s')\n", ex.what()); \
+		tctest_failures++; \
+		if (tctest_on_test_executed) { \
+			tctest_on_test_executed(#func, 0); \
+		} \
+	} catch (...) { \
+		printf("exception\n"); \
+		tctest_failures++; \
+		if (tctest_on_test_executed) { \
+			tctest_on_test_executed(#func, 0); \
+		} \
+	}
+
+#else
+/*
+ * No try/catch in plain C code
+ */
+#  define TCTEST_TRY
+#  define TCTEST_CATCH(func)
+#endif
+
 #define TEST_INIT() do { \
 	tctest_register_signal_handlers(); \
 } while (0)
@@ -74,6 +113,7 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 		TestObjs *t = 0; \
 		tctest_num_executed++; \
 		tctest_assertion_line = -1; \
+		TCTEST_TRY \
 		if (sigsetjmp(tctest_env, 1) == 0) { \
 			t = setup(); \
 			printf("%s...", #func); \
@@ -89,6 +129,7 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 				tctest_on_test_executed(#func, 0); \
 			} \
 		} \
+		TCTEST_CATCH(func) \
 		if (t) { \
 			cleanup(t); \
 		} \

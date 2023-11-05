@@ -1,6 +1,6 @@
 /*
  * TCTest - a tiny unit test framework for C
- * Copyright (c) 2013,2019-2020 David H. Hovemeyer <david.hovemeyer@gmail.com>
+ * Copyright (c) 2013,2019-2021,2023 David H. Hovemeyer <david.hovemeyer@gmail.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the

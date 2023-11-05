@@ -2,30 +2,35 @@ C_SRCS = demo.c demofn.c tctest.c
 CC = gcc
 CFLAGS = -g -Wall -Wextra -pedantic -std=gnu11
 
-COMMON_OBJS = demofn.o tctest.o
-DEMOPROGS = demo
+CXX_SRCS = demo_cplusplus.cpp demofn_cplusplus.cpp
+CXX = g++
+CXXFLAGS = -g -Wall -Wextra -pedantic -std=c++14
+
+COMMON_OBJS = tctest.o
+DEMOPROGS = demo demo_cplusplus
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $*.c
 
+%.o : %.cpp
+	$(CXX) $(CXXFLAGS) -c $*.cpp
+
 all : $(DEMOPROGS)
 
-demo : demo.o $(COMMON_OBJS)
-	$(CC) -o $@ demo.o $(COMMON_OBJS)
+demo : demo.o demofn.o $(COMMON_OBJS)
+	$(CC) -o $@ demo.o demofn.o $(COMMON_OBJS)
 
-demo.o : demo.c
-
-demofn.o : demofn.c demofn.h
-
-tctest.o : tctest.c tctest.h
+demo_cplusplus : demo_cplusplus.o demofn_cplusplus.o $(COMMON_OBJS)
+	$(CXX) -o $@ demo_cplusplus.o demofn_cplusplus.o $(COMMON_OBJS)
 
 .PHONY : clean
 
 clean :
-	rm -f *.o $(DEMOPROGS)
+	rm -f *.o $(DEMOPROGS) depend.mak
 
 depend :
 	$(CC) -M $(C_SRCS) > depend.mak
+	$(CXX) -M $(CXX_SRCS) >> depend.mak
 
 depend.mak :
 	touch $@
