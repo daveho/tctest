@@ -150,7 +150,7 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
  * ASSERT(0).
  */
 #define FAIL(msg) do { \
-	printf("%s\n", msg); \
+	printf("failed, %s\n", msg); \
 	siglongjmp(tctest_env, 1); \
 } while (0)
 
