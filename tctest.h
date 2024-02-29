@@ -168,14 +168,18 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 
 #define TEST_FINI() do { \
 	if (tctest_failures == 0) { \
-		printf("All tests passed!\n"); \
+		if (tctest_num_executed > 0) { \
+			printf("All tests passed!\n"); \
+		} else { \
+			printf("No tests were executed!\n"); \
+		} \
 	} else { \
 		printf("%d test(s) failed\n", tctest_failures); \
 	} \
 	if (tctest_on_complete) { \
 		tctest_on_complete(tctest_num_executed - tctest_failures, tctest_num_executed); \
 	} \
-	return tctest_failures > 0; \
+	return tctest_failures > 0 || (tctest_failures == 0 && tctest_num_executed == 0); \
 } while (0)
 
 #ifdef __cplusplus
