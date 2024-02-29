@@ -1,6 +1,6 @@
 /*
  * TCTest - a tiny unit test framework for C and C++
- * Copyright (c) 2013,2019-2021,2023 David H. Hovemeyer <david.hovemeyer@gmail.com>
+ * Copyright (c) 2013,2019-2021,2023,2024 David H. Hovemeyer <david.hovemeyer@gmail.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -40,11 +40,25 @@
 extern "C" {
 #endif
 
+#ifdef __GNUC__
+#  define TCTEST_PRINTF_FORMAT_ATTR __attribute__ ((format (printf, 1, 2)))
+#else
+#  define TCTEST_PRINTF_FORMAT_ATTR
+#endif
+
 extern sigjmp_buf tctest_env;
 extern int tctest_assertion_line;
 extern int tctest_failures;
 extern int tctest_num_executed;
 void tctest_register_signal_handlers(void);
+
+/*
+ * This function is called by the ASSERT() and FAIL() macros
+ * if a test failure occurs. So, setting a breakpoint on this
+ * function is a useful way to gain control on the first
+ * test failure.
+ */
+void tctest_fail(const char *fmt, ...) TCTEST_PRINTF_FORMAT_ATTR;
 
 /*
  * Setting this pointer to a non-null value will cause tctest to
@@ -139,8 +153,7 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 #define ASSERT(cond) do { \
 	tctest_assertion_line = __LINE__; \
 	if (!(cond)) { \
-		printf("failed ASSERT %s at line %d\n", #cond, __LINE__); \
-		siglongjmp(tctest_env, 1); \
+		tctest_fail("failed ASSERT %s at line %d\n", #cond, __LINE__); \
 	} \
 } while (0)
 
@@ -150,8 +163,7 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
  * ASSERT(0).
  */
 #define FAIL(msg) do { \
-	printf("failed, %s\n", msg); \
-	siglongjmp(tctest_env, 1); \
+	tctest_fail("failed, %s\n", msg); \
 } while (0)
 
 #define TEST_FINI() do { \

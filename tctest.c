@@ -1,6 +1,6 @@
 /*
  * TCTest - a tiny unit test framework for C
- * Copyright (c) 2013,2019-2021,2023 David H. Hovemeyer <david.hovemeyer@gmail.com>
+ * Copyright (c) 2013,2019-2021,2023,2024 David H. Hovemeyer <david.hovemeyer@gmail.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -24,6 +24,7 @@
 
 #include <signal.h>
 #include <unistd.h>
+#include <stdarg.h>
 #include "tctest.h"
 
 typedef struct {
@@ -137,4 +138,15 @@ void tctest_register_signal_handlers(void) {
 	for (i = 0; tctest_signal_list[i].signum != -1; i++) {
 		sigaction(tctest_signal_list[i].signum, &sa, NULL);
 	}
+}
+
+void tctest_fail(const char *fmt, ...) {
+	/* print the failure message */
+	va_list args;
+	va_start(args, fmt);
+	vfprintf(stdout, fmt, args);
+	va_end(args);
+
+	/* jump back to the TEST context */
+	siglongjmp(tctest_env, 1);
 }

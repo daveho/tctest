@@ -44,6 +44,7 @@ features](#advanced-features) section, and also the demo programs
 ([demo.c](demo.c) and [demo\_cplusplus.cpp](demo_cplusplus.cpp).)
 
 Support for C++ is fairly new (added November 5th, 2023.)
+However, it appears to work reasonably well.
 
 ## Demo program
 
@@ -69,6 +70,20 @@ test_convert_to_lower_2...failed ASSERT "hello, world" == objs->s2 at line 56
 test_convert_to_lower_3...std::exception (what='J causes exception for some reason!')
 2 test(s) failed
 ```
+
+## Debugging
+
+We have a couple of tips for using a debugger (e.g., `gdb`) to
+debug when a unit test fails.
+
+First, make sure your `main` function uses the `tctest_testname_to_execute`
+trick so that a command line argument can be provided to control which
+unit test is executed. (See the demo programs.) That way, your execution can
+run just the unit test you want to debug.
+
+You can set a breakpoint on the `tctest_fail()` function if you want to
+gain control of the program on the first failed `ASSERT()` or
+`FAIL()`.
 
 ## "Advanced" features
 
