@@ -55,11 +55,12 @@ program using TCTest.
 The expected output of the C demo program (`./demo`) is
 
 ```
-estPush...passed!
+testPush...passed!
 testPushMany...failed ASSERT !stackPush(objs->s, 11) at line 132
 testSwapTopElts...segmentation fault (most recent ASSERT at line 142)
 testSizeIsEven...floating point exception (most recent ASSERT at line 154)
 testSegfaultBeforeAssert...segmentation fault
+4 test(s) failed
 ```
 
 The expected output of the C++ demo program (`./demo_cplusplus`) is
